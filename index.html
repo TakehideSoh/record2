@@ -1,0 +1,40 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Swipe Color Change</title>
+    <style>
+body{
+    height:100vh;
+    margin-top:1rem;
+    background-color:#343434;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    gap:2rem;
+  }
+  .box{
+    width:40vw;
+    height:20vh;
+    border-radius:12px;
+    background-color:#fff;
+    transition: all 100ms ease;
+  }
+  .leftswipe{
+      transform: translateX(-3rem);
+      transition: all 500ms ease;
+  }
+    </style>
+</head>
+<body>
+    <script src="script.js"></script>    
+    <div class="box" ontouchstart="flickStart(event)" ontouchmove="flicking(event)" ontouchend="flickEnd(event)"></div>
+    <div class="box" ontouchstart="flickStart(event)" ontouchmove="flicking(event)" ontouchend="flickEnd(event)"></div>
+    <div class="box" ontouchstart="flickStart(event)" ontouchmove="flicking(event)" ontouchend="flickEnd(event)"></div>
+</body>
+</html>
+

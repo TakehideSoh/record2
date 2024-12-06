@@ -1,0 +1,21 @@
+body{
+    height:100vh;
+    margin-top:1rem;
+    background-color:#343434;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    gap:2rem;
+  }
+  .box{
+    width:40vw;
+    height:20vh;
+    border-radius:12px;
+    background-color:#fff;
+    transition: all 100ms ease;
+  }
+  .leftswipe{
+      transform: translateX(-3rem);
+      transition: all 500ms ease;
+  }
