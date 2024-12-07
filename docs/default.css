@@ -1,21 +1,51 @@
-body{
-    height:100vh;
-    margin-top:1rem;
-    background-color:#343434;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-    gap:2rem;
-  }
-  .box{
-    width:40vw;
-    height:20vh;
-    border-radius:12px;
-    background-color:#fff;
-    transition: all 100ms ease;
-  }
-  .leftswipe{
-      transform: translateX(-3rem);
-      transition: all 500ms ease;
-  }
+/* 共通ボタンスタイル */
+.button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    color: white;
+    font-size: 16px;
+}
+
+.button:hover {
+    opacity: 0.9; /* ホバー時に少し暗くする */
+}
+
+/* 非アクティブ状態 */
+.button {
+    background-color: #ccc; /* グレー */
+    color: black;
+}
+
+/* Yesボタンアクティブ時 */
+.button.active:nth-child(1) {
+    background-color: #4CAF50; /* 緑色 */
+    color: white;
+}
+
+/* Noボタンアクティブ時 */
+.button.active:nth-child(2) {
+    background-color: #f44336; /* 赤色 */
+    color: white;
+}
+
+#output {
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+    font-size: 16px;
+    white-space: pre-wrap; /* 改行をそのまま表示 */
+}
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+}
+button:hover {
+    background-color: #45a049;
+}
