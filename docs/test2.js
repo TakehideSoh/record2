@@ -44,13 +44,38 @@ function getCombinations(items, max_combination) {
     return shortenArray(combinations.sort(() => Math.random() - 0.5), max_combination);
 }
 
+function getCombinations2(items, max_combination) {
+
+    let sfle = items.sort(() => 0.5 - Math.random()).slice();
+
+    const combinations = [];    
+
+    while (combinations.length < max_combination) {
+
+        if (sfle.length < 2) {
+            sfle = sfle.concat(items.sort(() => 0.5 - Math.random()).slice());
+        }
+
+        console.log(sfle.length);
+
+        const p = sfle.pop();
+        const q = sfle.pop();
+
+        combinations.push([p, q]);
+
+    }    
+
+    return combinations;
+}
+
+
 function generateQuestions(items, num_combinations, num_per_combination) {
 
     if (items.length < 2) {
         throw new Error("配列の要素数は2以上でなければなりません");
     }
 
-    const cs = getCombinations(items, num_combinations);
+    const cs = getCombinations2(items, num_combinations);
 
     let counter = 0;
     let window3 = 0;
@@ -94,18 +119,22 @@ function generateQuestions(items, num_combinations, num_per_combination) {
 
 function displayQuestions() {
 
-    // console.log(`test`);
     const items = ["電車", "コップ", "歯ブラシ", "リモコン", "ショーン", "サイ", "フォーク", "ヨーグルト", "くつ", "バケツ"];
-
     const num_combinations = 10;
     const num_per_combination = 6;
+
+    const total = new Map();
 
     const questions = generateQuestions(items, num_combinations, num_per_combination)
 
     const container = document.getElementById("questions-container");
 
+    let counter = 0;
+
     questions.forEach((question, index) => {
         const [a, b, order] = question;
+
+        total.set(order, (total.get(order) || 0) + 1);
 
         const questionDiv = document.createElement("div");
         questionDiv.className = "question";
@@ -113,13 +142,19 @@ function displayQuestions() {
         // console.log(`${index}: (${a} ${b}) ${order}`);
 
         const questionText = document.createElement("p");
-        questionText.textContent = `${index + 1}: (${a} ${b}) ${order}`;
+        if (counter % num_per_combination === 0) {
+            questionText.innerHTML = `<hr> (${a} ${b})<hr> <br> ${index + 1}: ${order}`;
+        } else {
+            questionText.innerHTML = `${index + 1}: ${order}`;
+        }
+        
         questionDiv.appendChild(questionText);
 
         const buttonsDiv = document.createElement("div");
         buttonsDiv.className = "buttons";
 
         const yesButton = document.createElement("button");        
+        yesButton.style.marginRight = "20px"; // ボタン間に間隔を設ける
         yesButton.className = "button";
         yesButton.textContent = "正";
         yesButton.addEventListener("click", () => handleAnswer(index, a, b, order, 1));
@@ -142,7 +177,23 @@ function displayQuestions() {
 
         container.appendChild(questionDiv);
 
+        counter++;
+
     });
+
+
+    const output = [];
+    
+    total.forEach((value, key) => {
+        output.push(`${key} ${value}`);
+    });
+
+    const htmlContent = output.join('<br>');
+
+    document.getElementById("dist").innerHTML = htmlContent;
+
+
+
 }
 
 // アクティブ状態を設定する関数
@@ -196,7 +247,9 @@ function displayResult() {
     keys.forEach((key) => {
         // console.log(`${key} ${positive.get(key)}/${total.get(key)}`);
 
-        output.push(`${key} ${positive.get(key)}/${total.get(key)}`);
+        const ratio = positive.get(key) / total.get(key);
+
+        output.push(`${key} ${positive.get(key)}/${total.get(key)} = ${ratio.toFixed(2) * 100}`);
     });
 
     const htmlContent = output.join('<br>');
