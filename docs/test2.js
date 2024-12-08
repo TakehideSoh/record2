@@ -1,6 +1,5 @@
 const result = [...Array(100)].map((_, i) => ["", "", "", -1]);
 
-
 function shortenArray(array, n) {
     if (n <= 0) {
         throw new Error("長さ n は正の整数である必要があります");
@@ -20,35 +19,12 @@ function shortenArray(array, n) {
     return result;
 }
 
-function getCombinations(items, max_combination) {
-
-    const combinations = [];
-    for (let i = 0; i < items.length; i++) {
-        for (let j = i + 1; j < items.length; j++) {
-            // if (combinations.length >= max_combination) {
-            //     break;
-            // }
-            if (items[i] !== items[j]) {
-                let [l, r] = Math.random() < 0.5 ? [i, j] : [j, i];
-                combinations.push([items[l], items[r]]);
-            }
-
-        }
-    }
-
-    if (combinations.length < max_combination) {
-        console.log("error");
-        throw new Error("指定された個数の組み合わせを作ることができません");
-    }
-
-    return shortenArray(combinations.sort(() => Math.random() - 0.5), max_combination);
-}
-
 function getCombinations2(items, max_combination) {
 
     let sfle = items.sort(() => 0.5 - Math.random()).slice();
 
     const combinations = [];    
+    const pairs = new Set();
 
     while (combinations.length < max_combination) {
 
@@ -61,7 +37,13 @@ function getCombinations2(items, max_combination) {
         const p = sfle.pop();
         const q = sfle.pop();
 
-        combinations.push([p, q]);
+        if (pairs.has(`${p} ${q}`) && !pairs.has(`${q} ${p}`)) {
+            combinations.push([q, p]);
+        } else if (pairs.has(`${p} ${q}`) && pairs.has(`${q} ${p}`)) {
+            continue;
+        } else {
+            combinations.push([p, q]);
+        }
 
     }    
 
@@ -157,18 +139,28 @@ function displayQuestions() {
         yesButton.style.marginRight = "20px"; // ボタン間に間隔を設ける
         yesButton.className = "button";
         yesButton.textContent = "正";
-        yesButton.addEventListener("click", () => handleAnswer(index, a, b, order, 1));
         yesButton.addEventListener("click", () => {
+            handleAnswer(questions,index, a, b, order, 1);
             setActiveButton(yesButton, noButton); // Yesボタンをアクティブに
+            window.scrollBy({
+                top: 100, // 下にスクロール
+                left: 0,
+                behavior: "smooth" // スムーズなスクロール
+            });
         });
 
 
         const noButton = document.createElement("button");
         noButton.className = "button";
         noButton.textContent = "誤";
-        noButton.addEventListener("click", () => handleAnswer(index, a, b, order, 0));
         noButton.addEventListener("click", () => {
+            handleAnswer(questions, index, a, b, order, 0);
             setActiveButton(noButton, yesButton); // Noボタンをアクティブに
+            window.scrollBy({
+                top: 100, // 下にスクロール
+                left: 0,
+                behavior: "smooth" // スムーズなスクロール
+            });
         });
 
         buttonsDiv.appendChild(yesButton);
@@ -205,7 +197,7 @@ function setActiveButton(activeButton, inactiveButton) {
     inactiveButton.classList.remove("active");
 }
 
-function handleAnswer(index, l, r, order, res) {
+function handleAnswer(questions, index, l, r, order, res) {
 
     console.log(`handle ${index}: (${l} ${r}) ${order} ${res}`);
 
@@ -213,7 +205,7 @@ function handleAnswer(index, l, r, order, res) {
 
     console.log(`${result[index]}`);
 
-    displayResult();
+    displayResult(questions);
 }
 
 
@@ -221,11 +213,13 @@ function recordResult(index, l, r, order, res) {
     result[index] = [l, r, order, res];
 }
 
-function displayResult() {
+function displayResult(questions) {
 
     const total = new Map();
     const positive = new Map();
     const keys = new Set();
+    const pair0 = new Map();
+    const pair1 = new Map();
 
     const output = []
 
@@ -236,13 +230,33 @@ function displayResult() {
         if (res > -1) {
             console.log(`${i}: (${left} ${right}) ${order} ${res}`);
 
+            const p = `${left} ${right}`;
+
             total.set(order, (total.get(order) || 0) + 1);
             positive.set(order, (positive.get(order) || 0) + res);
+            pair0.set(p, (pair0.get(p) || 0) + res);
+            pair1.set(p, (pair1.get(p) || 0) + 1);
 
             keys.add(order);
         }
 
     });
+
+    let previous = '';
+    questions.forEach((question, index) => {
+        const [a, b, order] = question;
+
+        const p = `${a} ${b}`;
+
+        if (previous !== p && pair0.has(p)) {
+            const ratio = pair0.get(p) / pair1.get(p);
+            output.push(`${a} vs ${b}: ${pair0.get(p)}/${pair1.get(p)} = ${ratio.toFixed(2) * 100}`);
+        }
+        previous = p;
+
+    })
+
+    output.push('');
 
     keys.forEach((key) => {
         // console.log(`${key} ${positive.get(key)}/${total.get(key)}`);
