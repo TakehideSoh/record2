@@ -257,6 +257,9 @@ function displayResult(questions) {
     });
 
     let previous = '';
+    let total_sum = 0;
+    let total_success = 0;
+
     questions.forEach((question, index) => {
         const [a, b, order] = question;
 
@@ -275,10 +278,18 @@ function displayResult(questions) {
     keys.forEach((key) => {
         // console.log(`${key} ${positive.get(key)}/${total.get(key)}`);
 
+        total_sum += total.get(key);
+        total_success += positive.get(key);
+
         const ratio = positive.get(key) / total.get(key);
 
         output.push(`${key} ${positive.get(key)}/${total.get(key)} = ${ratio.toFixed(2) * 100}`);
     });
+
+    const ratio = total_success / total_sum;
+
+    output.push('');
+    output.push(`全体 ${total_success}/${total_sum} = ${ratio.toFixed(2) * 100}`);
 
     const htmlContent = output.join('<br>');
 
