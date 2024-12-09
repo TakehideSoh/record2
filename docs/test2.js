@@ -39,11 +39,15 @@ function getCombinations2(items, max_combination) {
 
         if (pairs.has(`${p} ${q}`) && !pairs.has(`${q} ${p}`)) {
             combinations.push([q, p]);
+            pairs.add(`${q} ${p}`);
         } else if (pairs.has(`${p} ${q}`) && pairs.has(`${q} ${p}`)) {
             continue;
         } else {
             combinations.push([p, q]);
+            pairs.add(`${p} ${q}`);
         }
+
+        
 
     }    
 
@@ -95,7 +99,7 @@ function generateQuestions(items, num_combinations, num_per_combination) {
 
     }
 
-    return questions;
+    return [questions, cs];
 
 }
 
@@ -107,7 +111,7 @@ function displayQuestions() {
 
     const total = new Map();
 
-    const questions = generateQuestions(items, num_combinations, num_per_combination)
+    const [questions,combinations] = generateQuestions(items, num_combinations, num_per_combination)
 
     const container = document.getElementById("questions-container");
 
@@ -180,7 +184,17 @@ function displayQuestions() {
         output.push(`${key} ${value}`);
     });
 
-    const htmlContent = output.join('<br>');
+    const str1 = output.join(' ');
+
+    output.length = 0;
+    combinations.forEach((pair) => {
+        const [a, b] = pair;
+        output.push(`${a} vs ${b}`);
+    })
+
+    const str2 = output.join('<br>');
+
+    const htmlContent = str2 + '<br><hr>' + str1;
 
     document.getElementById("dist").innerHTML = htmlContent;
 
@@ -278,7 +292,7 @@ displayQuestions();
 document.getElementById("copyButton").addEventListener("click", () => {
     // 出力要素を取得
     const output = document.getElementById("output");
-    const textToCopy = output.textContent; // または innerText を使用
+    const textToCopy = output.innerText; // または innerText を使用
 
     // クリップボードにコピー
     navigator.clipboard.writeText(textToCopy).then(() => {
