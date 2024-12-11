@@ -63,6 +63,8 @@ function generateQuestions(items, num_combinations, num_per_combination) {
 
     const cs = getCombinations2(items, num_combinations);
 
+    console.log("CHECK2",num_combinations,num_per_combination);
+
     let counter = 0;
     let window3 = 0;
     let previous = '';
@@ -103,17 +105,20 @@ function generateQuestions(items, num_combinations, num_per_combination) {
 
 }
 
-function displayQuestions() {
+function displayQuestions(items, num_combinations, num_per_combination) {
 
-    const items = ["電車", "コップ", "歯ブラシ", "リモコン", "ショーン", "サイ", "フォーク", "ヨーグルト", "くつ", "バケツ"];
-    const num_combinations = 10;
-    const num_per_combination = 6;
+    // const items = ["電車", "コップ", "歯ブラシ", "リモコン", "ショーン", "サイ", "フォーク", "ヨーグルト", "くつ", "バケツ"];
+    // const num_combinations = 10;
+    // const num_per_combination = 6;
+
+    console.log("CHECK", items, num_combinations, num_per_combination);
 
     const total = new Map();
 
     const [questions,combinations] = generateQuestions(items, num_combinations, num_per_combination)
 
     const container = document.getElementById("questions-container");
+    container.innerHTML = ""; // 古い内容を削除
 
     let counter = 0;
 
@@ -125,8 +130,6 @@ function displayQuestions() {
         const questionDiv = document.createElement("div");
         questionDiv.className = "question";
 
-        // console.log(`${index}: (${a} ${b}) ${order}`);
-
         const questionText = document.createElement("p");
         if (counter % num_per_combination === 0) {
             questionText.innerHTML = `<hr> (${a} ${b})<hr> <br> ${index + 1}: ${order}`;
@@ -135,6 +138,8 @@ function displayQuestions() {
         }
         
         questionDiv.appendChild(questionText);
+
+        console.log(`${index}: (${a} ${b}) ${order}`);
 
         const buttonsDiv = document.createElement("div");
         buttonsDiv.className = "buttons";
@@ -297,8 +302,28 @@ function displayResult(questions) {
 
 }
 
+document.getElementById('getChecked').addEventListener('click', function() {
+    // Get all checkboxes in the form
+    const checkboxes = document.querySelectorAll('#checkboxForm input[type="checkbox"]');
+    
+    // Filter the checked ones and get their values
+    const selectedItems = Array.from(checkboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.value);
 
-displayQuestions();
+    let binaryNum = document.getElementById('binaryNum').value;
+    let traialNum = document.getElementById('trialNum').value;
+
+    // Display the selected items
+    // document.getElementById('output').textContent = selectedItems.join(', ');
+
+    // Log the array (optional)
+    console.log(selectedItems,binaryNum,traialNum);
+
+    displayQuestions(selectedItems, binaryNum, traialNum);
+
+});
+
 
 document.getElementById("copyButton").addEventListener("click", () => {
     // 出力要素を取得
@@ -314,19 +339,3 @@ document.getElementById("copyButton").addEventListener("click", () => {
     });
 });
 
-/* 
-try {
-
-    const items = ["A", "B", "C", "D", "E"];
-
-    const num_combinations = 10;
-    const num_per_combination = 10;
-
-    generateQuestions(items, num_combinations, num_per_combination)
-
-
-
-} catch (error) {
-    console.error(error.message);
-}
- */
