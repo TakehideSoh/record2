@@ -1,4 +1,4 @@
-const result = [...Array(100)].map((_, i) => ["", "", "", -1]);
+const result = [...Array(100)].map((_, i) => ["", "", "", -1, ""]);
 
 function shortenArray(array, n) {
     if (n <= 0) {
@@ -19,20 +19,22 @@ function shortenArray(array, n) {
     return result;
 }
 
-function getCombinations2(items, max_combination) {
+function getCombinations2(items, comb_required) {
 
     let sfle = items.sort(() => 0.5 - Math.random()).slice();
+
+    const max_comb = items.length * (items.length - 1) / 2;
 
     const combinations = [];    
     const pairs = new Set();
 
-    while (combinations.length < max_combination) {
+    while (combinations.length < comb_required) {
 
         if (sfle.length < 2) {
             sfle = sfle.concat(items.sort(() => 0.5 - Math.random()).slice());
         }
 
-        console.log(sfle.length);
+       // console.log(sfle.length);
 
         const p = sfle.pop();
         const q = sfle.pop();
@@ -40,7 +42,7 @@ function getCombinations2(items, max_combination) {
         if (pairs.has(`${p} ${q}`) && !pairs.has(`${q} ${p}`)) {
             combinations.push([q, p]);
             pairs.add(`${q} ${p}`);
-        } else if (pairs.has(`${p} ${q}`) && pairs.has(`${q} ${p}`)) {
+        } else if (max_comb > combinations.length && pairs.has(`${p} ${q}`) && pairs.has(`${q} ${p}`)) {
             continue;
         } else {
             combinations.push([p, q]);
@@ -107,12 +109,6 @@ function generateQuestions(items, num_combinations, num_per_combination) {
 
 function displayQuestions(items, num_combinations, num_per_combination) {
 
-    // const items = ["電車", "コップ", "歯ブラシ", "リモコン", "ショーン", "サイ", "フォーク", "ヨーグルト", "くつ", "バケツ"];
-    // const num_combinations = 10;
-    // const num_per_combination = 6;
-
-    console.log("CHECK", items, num_combinations, num_per_combination);
-
     const total = new Map();
 
     const [questions,combinations] = generateQuestions(items, num_combinations, num_per_combination)
@@ -123,9 +119,15 @@ function displayQuestions(items, num_combinations, num_per_combination) {
     let counter = 0;
 
     questions.forEach((question, index) => {
+
         const [a, b, order] = question;
 
         total.set(order, (total.get(order) || 0) + 1);
+
+        let scroll_length = 100;
+        if ((counter+1) % num_per_combination === 0) {
+            scroll_length = 177;
+        }
 
         const questionDiv = document.createElement("div");
         questionDiv.className = "question";
@@ -139,7 +141,7 @@ function displayQuestions(items, num_combinations, num_per_combination) {
         
         questionDiv.appendChild(questionText);
 
-        console.log(`${index}: (${a} ${b}) ${order}`);
+        // console.log(`${index}: (${a} ${b}) ${order}`);
 
         const buttonsDiv = document.createElement("div");
         buttonsDiv.className = "buttons";
@@ -152,7 +154,7 @@ function displayQuestions(items, num_combinations, num_per_combination) {
             handleAnswer(questions,index, a, b, order, 1);
             setActiveButton(yesButton, noButton); // Yesボタンをアクティブに
             window.scrollBy({
-                top: 100, // 下にスクロール
+                top: scroll_length, // 下にスクロール
                 left: 0,
                 behavior: "smooth" // スムーズなスクロール
             });
@@ -166,7 +168,7 @@ function displayQuestions(items, num_combinations, num_per_combination) {
             handleAnswer(questions, index, a, b, order, 0);
             setActiveButton(noButton, yesButton); // Noボタンをアクティブに
             window.scrollBy({
-                top: 100, // 下にスクロール
+                top: scroll_length, // 下にスクロール
                 left: 0,
                 behavior: "smooth" // スムーズなスクロール
             });
@@ -240,14 +242,19 @@ function displayResult(questions) {
     const pair0 = new Map();
     const pair1 = new Map();
 
-    const output = []
+    const detailMap = new Map();
+
+    const output = [];
+
+    let previous = '';
+    let detail = '';
 
     result.forEach((_, i) => {
 
         let [left, right, order, res] = result[i];
 
         if (res > -1) {
-            console.log(`${i}: (${left} ${right}) ${order} ${res}`);
+            // console.log(`${i}: (${left} ${right}) ${order} ${res}`);
 
             const p = `${left} ${right}`;
 
@@ -257,28 +264,45 @@ function displayResult(questions) {
             pair1.set(p, (pair1.get(p) || 0) + 1);
 
             keys.add(order);
+
+            let symbol = '';
+            if (left == order) { // L
+                if (result[i][3] == 1) {
+                    symbol = "L";
+                } else {
+                    symbol = "l";
+                }
+            } else { // R
+                if (result[i][3] == 1) {
+                    symbol = "R";
+                } else {
+                    symbol = "r";
+                }
+            }
+            detailMap.set(p, (detailMap.get(p) || '')  + symbol);
         }
 
     });
 
-    let previous = '';
-    let total_sum = 0;
-    let total_success = 0;
+    previous = '';
 
     questions.forEach((question, index) => {
         const [a, b, order] = question;
 
         const p = `${a} ${b}`;
+        const ratio = pair0.get(p) / pair1.get(p);
 
         if (previous !== p && pair0.has(p)) {
-            const ratio = pair0.get(p) / pair1.get(p);
-            output.push(`${a} vs ${b}: ${pair0.get(p)}/${pair1.get(p)} = ${ratio.toFixed(2) * 100}`);
+            output.push(`${a} vs ${b}: ${pair0.get(p)}/${pair1.get(p)} = ${ratio.toFixed(2) * 100} (${detailMap.get(p)})`);
         }
         previous = p;
 
     })
 
     output.push('');
+
+    let total_sum = 0;
+    let total_success = 0;
 
     keys.forEach((key) => {
         // console.log(`${key} ${positive.get(key)}/${total.get(key)}`);
@@ -294,7 +318,7 @@ function displayResult(questions) {
     const ratio = total_success / total_sum;
 
     output.push('');
-    output.push(`全体 ${total_success}/${total_sum} = ${ratio.toFixed(2) * 100}`);
+    output.push(`全体 ${total_success}/${total_sum} = ${Math.round(ratio.toFixed(2) * 100)}<br>`);
 
     const htmlContent = output.join('<br>');
 
@@ -318,7 +342,9 @@ document.getElementById('getChecked').addEventListener('click', function() {
     // document.getElementById('output').textContent = selectedItems.join(', ');
 
     // Log the array (optional)
-    console.log(selectedItems,binaryNum,traialNum);
+    // console.log(selectedItems,binaryNum,traialNum);
+
+    document.getElementById("output").innerHTML = "";
 
     displayQuestions(selectedItems, binaryNum, traialNum);
 
