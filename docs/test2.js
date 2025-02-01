@@ -1,5 +1,17 @@
 const result = [...Array(100)].map((_, i) => ["", "", "", -1, ""]);
 
+const difficult = ["apple", "banana", "cherry", "date", "elderberry", "fig", "grape", "honeydew", "kiwi", "lemon", "mango", "nectarine", "orange", "papaya", "quince", "raspberry", "strawberry", "tangerine", "watermelon"];
+const easy = ['電車', 'コップ', 'フォーク'];
+
+
+// シャッフル関数（Fisher-Yates）
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+}
+
 function shortenArray(array, n) {
     if (n <= 0) {
         throw new Error("長さ n は正の整数である必要があります");
@@ -21,37 +33,35 @@ function shortenArray(array, n) {
 
 function getCombinations2(items, comb_required) {
 
-    let sfle = items.sort(() => 0.5 - Math.random()).slice();
+    let remainingDifficult = [...items];
+    shuffle(remainingDifficult);
 
-    const max_comb = items.length * (items.length - 1) / 2;
+    function getRandomPair() {
+        if (remainingDifficult.length === 0) {
+            remainingDifficult = [...difficult];
+            shuffle(remainingDifficult);
+        }
 
-    const combinations = [];    
+        const difficultItem = remainingDifficult.pop();
+        const easyItem = easy[Math.floor(Math.random() * easy.length)];
+
+        // 左右をランダムに配置
+        if (Math.random() < 0.5) {
+            return [difficultItem, easyItem];
+        } else {
+            return [easyItem, difficultItem];
+        }
+    }
+
+    const combinations = [];
     const pairs = new Set();
 
     while (combinations.length < comb_required) {
 
-        if (sfle.length < 2) {
-            sfle = sfle.concat(items.sort(() => 0.5 - Math.random()).slice());
-        }
+        const [p, q] = getRandomPair();
+        combinations.push([p, q]);
 
-       // console.log(sfle.length);
-
-        const p = sfle.pop();
-        const q = sfle.pop();
-
-        if (pairs.has(`${p} ${q}`) && !pairs.has(`${q} ${p}`)) {
-            combinations.push([q, p]);
-            pairs.add(`${q} ${p}`);
-        } else if (max_comb > combinations.length && pairs.has(`${p} ${q}`) && pairs.has(`${q} ${p}`)) {
-            continue;
-        } else {
-            combinations.push([p, q]);
-            pairs.add(`${p} ${q}`);
-        }
-
-        
-
-    }    
+    }
 
     return combinations;
 }
@@ -65,7 +75,7 @@ function generateQuestions(items, num_combinations, num_per_combination) {
 
     const cs = getCombinations2(items, num_combinations);
 
-    console.log("CHECK2",num_combinations,num_per_combination);
+    console.log("CHECK2", num_combinations, num_per_combination);
 
     let counter = 0;
     let window3 = 0;
@@ -111,7 +121,7 @@ function displayQuestions(items, num_combinations, num_per_combination) {
 
     const total = new Map();
 
-    const [questions,combinations] = generateQuestions(items, num_combinations, num_per_combination)
+    const [questions, combinations] = generateQuestions(items, num_combinations, num_per_combination)
 
     const container = document.getElementById("questions-container");
     container.innerHTML = ""; // 古い内容を削除
@@ -125,7 +135,7 @@ function displayQuestions(items, num_combinations, num_per_combination) {
         total.set(order, (total.get(order) || 0) + 1);
 
         let scroll_length = 100;
-        if ((counter+1) % num_per_combination === 0) {
+        if ((counter + 1) % num_per_combination === 0) {
             scroll_length = 177;
         }
 
@@ -138,7 +148,7 @@ function displayQuestions(items, num_combinations, num_per_combination) {
         } else {
             questionText.innerHTML = `${index + 1}: ${order}`;
         }
-        
+
         questionDiv.appendChild(questionText);
 
         // console.log(`${index}: (${a} ${b}) ${order}`);
@@ -146,12 +156,12 @@ function displayQuestions(items, num_combinations, num_per_combination) {
         const buttonsDiv = document.createElement("div");
         buttonsDiv.className = "buttons";
 
-        const yesButton = document.createElement("button");        
+        const yesButton = document.createElement("button");
         yesButton.style.marginRight = "20px"; // ボタン間に間隔を設ける
         yesButton.className = "button";
         yesButton.textContent = "正";
         yesButton.addEventListener("click", () => {
-            handleAnswer(questions,index, a, b, order, 1);
+            handleAnswer(questions, index, a, b, order, 1);
             setActiveButton(yesButton, noButton); // Yesボタンをアクティブに
             window.scrollBy({
                 top: scroll_length, // 下にスクロール
@@ -186,7 +196,7 @@ function displayQuestions(items, num_combinations, num_per_combination) {
 
 
     const output = [];
-    
+
     total.forEach((value, key) => {
         output.push(`${key} ${value}`);
     });
@@ -279,7 +289,7 @@ function displayResult(questions) {
                     symbol = "r";
                 }
             }
-            detailMap.set(p, (detailMap.get(p) || '')  + symbol);
+            detailMap.set(p, (detailMap.get(p) || '') + symbol);
         }
 
     });
@@ -326,10 +336,10 @@ function displayResult(questions) {
 
 }
 
-document.getElementById('getChecked').addEventListener('click', function() {
+document.getElementById('getChecked').addEventListener('click', function () {
     // Get all checkboxes in the form
     const checkboxes = document.querySelectorAll('#checkboxForm input[type="checkbox"]');
-    
+
     // Filter the checked ones and get their values
     const selectedItems = Array.from(checkboxes)
         .filter(checkbox => checkbox.checked)
