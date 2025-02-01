@@ -1,6 +1,5 @@
 const result = [...Array(100)].map((_, i) => ["", "", "", -1, ""]);
 
-const difficult = ["apple", "banana", "cherry", "date", "elderberry", "fig", "grape", "honeydew", "kiwi", "lemon", "mango", "nectarine", "orange", "papaya", "quince", "raspberry", "strawberry", "tangerine", "watermelon"];
 const easy = ['電車', 'コップ', 'フォーク'];
 
 
@@ -38,7 +37,7 @@ function getCombinations2(items, comb_required) {
 
     function getRandomPair() {
         if (remainingDifficult.length === 0) {
-            remainingDifficult = [...difficult];
+            remainingDifficult = [...items];
             shuffle(remainingDifficult);
         }
 
