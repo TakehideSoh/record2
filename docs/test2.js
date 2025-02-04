@@ -1,6 +1,6 @@
 const result = [...Array(100)].map((_, i) => ["", "", "", -1, ""]);
 
-const easy = ['電車', 'コップ', '歯ブラシ'];
+const easy = ['電車', 'コップ', '歯ブラシ', 'くつ'];
 
 
 // シャッフル関数（Fisher-Yates）
